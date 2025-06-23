@@ -856,54 +856,6 @@ const App: React.FC = () => {
     [dispatch],
   );
 
-  // Subscribe to incoming deeplinks
-  // Ex. SDK and WalletConnect deeplinks will funnel through here when opening the app from the device's camera
-  useEffect(() => {
-    Linking.addEventListener('url', (params) => {
-      const { url } = params;
-      if (url) {
-        handleDeeplink({ uri: url });
-      }
-    });
-  }, [handleDeeplink]);
-
-  // Subscribe to incoming Branch deeplinks
-  // Branch.io documentation: https://help.branch.io/developers-hub/docs/react-native
-  // Ex. Branch links will funnel through here when opening the app from a Branch link
-  useEffect(() => {
-    // Initialize deep link manager
-    SharedDeeplinkManager.init({
-      navigation,
-      dispatch,
-    });
-
-    branch.subscribe((opts) => {
-      const { error } = opts;
-
-      // Log error for analytics and continue handling deeplink
-      if (error) {
-        trackErrorAsAnalytics(error, 'Branch:');
-      }
-
-      branch.getLatestReferringParams().then((val) => {
-        const deeplink = opts.uri || (val['+non_branch_link'] as string);
-        handleDeeplink({ uri: deeplink });
-      });
-
-      // TODO: We should be able to remove this since deeplinks are only parsed if user is logged in
-      // if (sdkInit.current) {
-      //   handleDeeplink(opts);
-      // } else {
-      //   queueOfHandleDeeplinkFunctions.current =
-      //     queueOfHandleDeeplinkFunctions.current.concat([
-      //       () => {
-      //         handleDeeplink(opts);
-      //       },
-      //     ]);
-      // }
-    });
-  }, [dispatch, handleDeeplink, navigation]);
-
   useEffect(() => {
     const initMetrics = async () => {
       await MetaMetrics.getInstance().configure();
@@ -912,52 +864,6 @@ const App: React.FC = () => {
     initMetrics().catch((err) => {
       Logger.error(err, 'Error initializing MetaMetrics');
     });
-  }, []);
-
-  useEffect(() => {
-    // Init SDKConnect only if the navigator is ready, user is onboarded, and SDK is not initialized.
-    async function initSDKConnect() {
-      if (onboarded && sdkInit.current === undefined && userLoggedIn) {
-        sdkInit.current = false;
-        try {
-          const sdkConnect = SDKConnect.getInstance();
-          await sdkConnect.init({
-            context: 'Nav/App',
-            navigation: NavigationService.navigation,
-          });
-          await SDKConnect.getInstance().postInit(() => {
-            // TODO: We should be able to remove queueOfHandleDeeplinkFunctions since deeplinks are only parsed if user is logged in
-            // setTimeout(() => {
-            //   queueOfHandleDeeplinkFunctions.current = [];
-            // }, 1000);
-          });
-          sdkInit.current = true;
-        } catch (err) {
-          sdkInit.current = undefined;
-          console.error(`Cannot initialize SDKConnect`, err);
-        }
-      }
-    }
-
-    initSDKConnect()
-      // TODO: We should be able to remove this since deeplinks are only parsed if user is logged in
-      // .then(() => {
-      //   queueOfHandleDeeplinkFunctions.current.forEach((func) => func());
-      // })
-      .catch((err) => {
-        Logger.error(err, 'Error initializing SDKConnect');
-      });
-  }, [onboarded, userLoggedIn]);
-
-  useEffect(() => {
-    if (isWC2Enabled) {
-      DevLogger.log(`WalletConnect: Initializing WalletConnect Manager`);
-      WC2Manager.init({ navigation: NavigationService.navigation }).catch(
-        (err) => {
-          console.error('Cannot initialize WalletConnect Manager.', err);
-        },
-      );
-    }
   }, []);
 
   useEffect(() => {
