@@ -359,12 +359,14 @@ export function* handleDeeplinkServiceInitialization() {
   const queueOfHandleDeeplinkFunctions: DeepLinkQueuedItem[] = [];
   const sdkState: SDKInitState = { isInitialized: false };
 
+  // 1st. Initialize deeplink handling and URL processing (closed state)
   const { handleDeeplink } = yield call(
     handleInitialDeeplink,
     queueOfHandleDeeplinkFunctions,
     sdkState
   );
 
+  // 2nd. Initialize SharedDeeplinkManager and branch subscribe
   yield call(
     handleSharedDeeplinkManager,
     queueOfHandleDeeplinkFunctions,
@@ -372,6 +374,7 @@ export function* handleDeeplinkServiceInitialization() {
     handleDeeplink
   );
 
+  // 3rd. Initialize SDKConnect when user is onboarded and logged in
   yield call(
     handleSDKConnect,
     queueOfHandleDeeplinkFunctions,
