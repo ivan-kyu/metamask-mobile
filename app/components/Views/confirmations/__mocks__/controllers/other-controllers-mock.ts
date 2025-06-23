@@ -123,6 +123,16 @@ export const nftControllerMock = {
   },
 };
 
+export const preferencesControllerMock = {
+  engine: {
+    backgroundState: {
+      PreferencesController: {
+        useTransactionSimulations: true,
+      },
+    },
+  },
+};
+
 export const otherControllersMock = merge(
   {},
   accountsControllerMock,
@@ -132,5 +142,6 @@ export const otherControllersMock = merge(
   networkControllerMock,
   multichainNetworkControllerMock,
   nftControllerMock,
+  preferencesControllerMock,
   tokenBalancesControllerMock,
 );
