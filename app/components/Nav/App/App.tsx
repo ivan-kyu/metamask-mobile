@@ -778,13 +778,8 @@ const AppFlow = () => {
 };
 
 const App: React.FC = () => {
-  const userLoggedIn = useSelector(selectUserLoggedIn);
-  const [onboarded, setOnboarded] = useState(false);
   const navigation = useNavigation();
-  // const queueOfHandleDeeplinkFunctions = useRef<(() => void)[]>([]);
   const { toastRef } = useContext(ToastContext);
-  const dispatch = useDispatch();
-  const sdkInit = useRef<boolean | undefined>(undefined);
   const isFirstRender = useRef(true);
 
   if (isFirstRender.current) {
@@ -805,7 +800,6 @@ const App: React.FC = () => {
   useEffect(() => {
     const appTriggeredAuth = async () => {
       const existingUser = await StorageWrapper.getItem(EXISTING_USER);
-      setOnboarded(!!existingUser);
       try {
         if (existingUser) {
           // This should only be called if the auth type is not password, which is not the case so consider removing it
@@ -841,20 +835,6 @@ const App: React.FC = () => {
       Logger.error(error, 'App: Error in appTriggeredAuth');
     });
   }, [navigation]);
-
-  const handleDeeplink = useCallback(
-    ({ uri }: { uri?: string }) => {
-      try {
-        if (uri && typeof uri === 'string') {
-          AppStateEventProcessor.setCurrentDeeplink(uri);
-          dispatch(checkForDeeplink());
-        }
-      } catch (e) {
-        Logger.error(e as Error, `Deeplink: Error parsing deeplink`);
-      }
-    },
-    [dispatch],
-  );
 
   useEffect(() => {
     const initMetrics = async () => {

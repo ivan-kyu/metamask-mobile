@@ -176,7 +176,6 @@ export function* handleDeeplinkSaga() {
     }
 
     const deeplink = AppStateEventProcessor.pendingDeeplink;
-
     if (deeplink) {
       // TODO: See if we can hook into a navigation finished event before parsing so that the modal doesn't conflict with ongoing navigation events
       setTimeout(() => {
