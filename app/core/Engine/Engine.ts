@@ -227,7 +227,7 @@ import {
 import { ErrorReportingService } from '@metamask/error-reporting-service';
 import { captureException } from '@sentry/react-native';
 import { WebSocketServiceInit } from './controllers/snaps/websocket-service-init';
-import { ApprovalTypes } from '../RPCMethods/RPCMethodMiddleware.js';
+import { ApprovalTypes } from '../RPCMethods/RPCMethodMiddleware';
 
 const NON_EMPTY = 'NON_EMPTY';
 
