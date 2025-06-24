@@ -29,6 +29,9 @@ const styleSheet = (params: { theme: Theme }) => {
     container: {
       padding: 16,
     },
+    scrollContentContainer: {
+      paddingBottom: 64,
+    },
 
     header: {
       display: 'flex',

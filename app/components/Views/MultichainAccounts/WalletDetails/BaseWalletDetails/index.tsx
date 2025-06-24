@@ -12,7 +12,7 @@ import Icon, {
   IconSize,
   IconName,
 } from '../../../../../component-library/components/Icons/Icon';
-import { TouchableOpacity, View, ViewStyle } from 'react-native';
+import { ScrollView, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { WalletDetailsIds } from '../../../../../../e2e/selectors/MultichainAccounts/WalletDetails';
 import {
   AlignItems,
@@ -168,9 +168,11 @@ export const BaseWalletDetails = ({
       >
         {wallet.metadata.name}
       </HeaderBase>
-      <View
+      <ScrollView
         style={styles.container}
+        contentContainerStyle={styles.scrollContentContainer}
         testID={WalletDetailsIds.WALLET_DETAILS_CONTAINER}
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.walletName}>
           <Text variant={TextVariant.BodyMDMedium}>
@@ -262,7 +264,7 @@ export const BaseWalletDetails = ({
           {accounts.map((account, index) => renderAccountItem(account, index))}
         </View>
         {children}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
