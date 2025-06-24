@@ -96,12 +96,6 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
         style={styles.base}
         {...props}
       >
-        <BottomSheetOverlay
-          disabled={!isInteractable}
-          onPress={() => {
-            isInteractable && bottomSheetDialogRef.current?.onCloseDialog();
-          }}
-        />
         <BottomSheetDialog
           isInteractable={isInteractable}
           onClose={onCloseCB}
