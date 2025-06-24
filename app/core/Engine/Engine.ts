@@ -227,6 +227,7 @@ import {
 import { ErrorReportingService } from '@metamask/error-reporting-service';
 import { captureException } from '@sentry/react-native';
 import { WebSocketServiceInit } from './controllers/snaps/websocket-service-init';
+import { ApprovalTypes } from '../RPCMethods/RPCMethodMiddleware.js';
 
 const NON_EMPTY = 'NON_EMPTY';
 
@@ -303,6 +304,7 @@ export class Engine {
       typesExcludedFromRateLimiting: [
         ApprovalType.Transaction,
         ApprovalType.WatchAsset,
+        ApprovalTypes.SMART_TRANSACTION_STATUS,
       ],
     });
 
