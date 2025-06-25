@@ -1,28 +1,16 @@
-import { NavigationProp, ParamListBase } from '@react-navigation/native';
-import { Dispatch } from 'redux';
 import DevLogger from '../SDKConnect/utils/DevLogger';
 import DeeplinkManager from './DeeplinkManager';
 
 let instance: DeeplinkManager;
 
+//TODO: This doesn't seem like needed to me, we could be just using DeeplinkManager directly
 const SharedDeeplinkManager = {
   getInstance: () => instance,
-  init: ({
-    navigation,
-    dispatch,
-  }: {
-    navigation: NavigationProp<ParamListBase>;
-    // TODO: Replace "any" with type
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dispatch: Dispatch<any>;
-  }) => {
+  init: () => {
     if (instance) {
       return;
     }
-    instance = new DeeplinkManager({
-      navigation,
-      dispatch,
-    });
+    instance = new DeeplinkManager();
     DevLogger.log(`DeeplinkManager initialized`);
   },
   parse: (
@@ -36,6 +24,7 @@ const SharedDeeplinkManager = {
   setDeeplink: (url: string) => instance.setDeeplink(url),
   getPendingDeeplink: () => instance.getPendingDeeplink(),
   expireDeeplink: () => instance.expireDeeplink(),
+  start: () => instance.start(),
 };
 
 export default SharedDeeplinkManager;

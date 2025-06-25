@@ -1,12 +1,9 @@
 import React, {
-  useCallback,
   useContext,
   useEffect,
   useRef,
-  useState,
 } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { Linking } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Login from '../../Views/Login';
 import QRTabSwitcher from '../../Views/QRTabSwitcher';
@@ -24,10 +21,8 @@ import DeleteWalletModal from '../../../components/UI/DeleteWalletModal';
 import Main from '../Main';
 import OptinMetrics from '../../UI/OptinMetrics';
 import SimpleWebview from '../../Views/SimpleWebview';
-import SharedDeeplinkManager from '../../../core/DeeplinkManager/SharedDeeplinkManager';
-import branch from 'react-native-branch';
 import Logger from '../../../util/Logger';
-import { useDispatch, useSelector } from 'react-redux';
+import {  useSelector } from 'react-redux';
 import {
   CURRENT_APP_VERSION,
   EXISTING_USER,
@@ -35,7 +30,6 @@ import {
 } from '../../../constants/storage';
 import { getVersion } from 'react-native-device-info';
 import { Authentication } from '../../../core/';
-import SDKConnect from '../../../core/SDKConnect/SDKConnect';
 import { colors as importedColors } from '../../../styles/common';
 import Routes from '../../../constants/navigation/Routes';
 import ModalConfirmation from '../../../component-library/components/Modals/ModalConfirmation';
@@ -78,10 +72,6 @@ import NetworkSelector from '../../../components/Views/NetworkSelector';
 import ReturnToAppModal from '../../Views/ReturnToAppModal';
 import EditAccountName from '../../Views/EditAccountName/EditAccountName';
 import MultichainEditAccountName from '../../Views/MultichainAccounts/sheets/EditAccountName';
-import WC2Manager, {
-  isWC2Enabled,
-} from '../../../../app/core/WalletConnect/WalletConnectV2';
-import { DevLogger } from '../../../../app/core/SDKConnect/utils/DevLogger';
 import { PPOMView } from '../../../lib/ppom/PPOMView';
 import LockScreen from '../../Views/LockScreen';
 import StorageWrapper from '../../../store/storage-wrapper';
@@ -112,7 +102,6 @@ import ChangeInSimulationModal from '../../Views/ChangeInSimulationModal/ChangeI
 import TooltipModal from '../../../components/Views/TooltipModal';
 import OptionsSheet from '../../UI/SelectOptionSheet/OptionsSheet';
 import FoxLoader from '../../../components/UI/FoxLoader';
-import { AppStateEventProcessor } from '../../../core/AppStateEventListener';
 import MultiRpcModal from '../../../components/Views/MultiRpcModal/MultiRpcModal';
 import Engine from '../../../core/Engine';
 import { CHAIN_IDS } from '@metamask/transaction-controller';
@@ -129,7 +118,6 @@ import { selectUserLoggedIn } from '../../../reducers/user/selectors';
 import { Confirm } from '../../Views/confirmations/components/confirm';
 import ImportNewSecretRecoveryPhrase from '../../Views/ImportNewSecretRecoveryPhrase';
 import { SelectSRPBottomSheet } from '../../Views/SelectSRP/SelectSRPBottomSheet';
-import NavigationService from '../../../core/NavigationService';
 import SeedphraseModal from '../../UI/SeedphraseModal';
 import SkipAccountSecurityModal from '../../UI/SkipAccountSecurityModal';
 import SuccessErrorSheet from '../../Views/SuccessErrorSheet';
@@ -142,7 +130,6 @@ import DeleteAccount from '../../Views/MultichainAccounts/sheets/DeleteAccount';
 import RevealPrivateKey from '../../Views/MultichainAccounts/sheets/RevealPrivateKey';
 import RevealSRP from '../../Views/MultichainAccounts/sheets/RevealSRP';
 import { DeepLinkModal } from '../../UI/DeepLinkModal';
-import { checkForDeeplink } from '../../../actions/user';
 import { WalletDetails } from '../../Views/MultichainAccounts/WalletDetails/WalletDetails';
 
 const clearStackNavigatorOptions = {

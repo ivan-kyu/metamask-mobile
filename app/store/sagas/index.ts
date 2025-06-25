@@ -10,7 +10,6 @@ import {
   UserActionType,
   LoginAction,
   CheckForDeeplinkAction,
-  checkForDeeplink,
 } from '../../actions/user';
 import { NavigationActionType } from '../../actions/navigation';
 import { Task } from 'redux-saga';
@@ -31,16 +30,8 @@ import {
   SetCompletedOnboardingAction,
 } from '../../actions/onboarding';
 import { selectCompletedOnboarding } from '../../selectors/onboarding';
-import { selectUserLoggedIn } from '../../reducers/user';
-import branch from 'react-native-branch';
 import SDKConnect from '../../core/SDKConnect/SDKConnect';
-import WC2Manager, { isWC2Enabled } from '../../core/WalletConnect/WalletConnectV2';
-import { store } from '../../store';
-import { DevLogger } from '../../core/SDKConnect/utils/DevLogger';
-import StorageWrapper from '../../store/storage-wrapper';
-import { EXISTING_USER } from '../../constants/storage';
-import { Linking } from 'react-native';
-import Device from '../../util/device';
+import WC2Manager from '../../core/WalletConnect/WalletConnectV2';
 
 export function* appLockStateMachine() {
   let biometricsListenerTask: Task<void> | undefined;
@@ -188,201 +179,6 @@ export function* handleDeeplinkSaga() {
   }
 }
 
-type DeepLinkQueuedItem = {
-  uri: string;
-  func: () => void;
-}
-
-type SDKInitState = {
-  isInitialized: boolean;
-}
-
-/**
- * Initializes deeplink handling and URL processing
- */
-function* handleInitialDeeplink(
-  queueOfHandleDeeplinkFunctions: DeepLinkQueuedItem[],
-  sdkState: SDKInitState,
-) {
-  // Subscribe to incoming deeplinks
-  // Branch.io documentation: https://help.branch.io/developers-hub/docs/react-native
-  const handleDeeplink = (opts: {
-   // error?: string | null;
-      // params?: Record<string, unknown>;
-    uri?: string;
-  }) => {
-    const { dispatch } = store;
-    const {uri} = opts;
-    // if (error) {
-    //   trackErrorAsAnalytics(error, 'Branch:');
-    // }
-    // const deeplink = params?.['+non_branch_link'] || uri || null;
-    try {
-      if (uri && typeof uri === 'string') {
-        AppStateEventProcessor.setCurrentDeeplink(uri);
-        dispatch(checkForDeeplink());
-      }
-    } catch (e) {
-      Logger.error(e as Error, `Deeplink: Error parsing deeplink`);
-    }
-  };
-
-  const handleURL = (url: string) => {
-    if (url && sdkState.isInitialized) {
-      handleDeeplink({ uri: url });
-    } else {
-      DevLogger.log(`android handleDeeplink:: adding ${url} to queue`);
-      queueOfHandleDeeplinkFunctions.push({
-        uri: url,
-        func: () => {
-          handleDeeplink({ uri: url });
-        },
-      });
-    }
-  };
-
-  Linking.getInitialURL().then((url) => {
-    if (!url) {
-      return;
-    }
-    DevLogger.log(`handleDeeplink:: got initial URL ${url}`);
-    handleURL(url);
-  });
-
-  if (Device.isAndroid()) {
-    Linking.addEventListener('url', (params) => {
-      const { url } = params;
-      handleURL(url);
-    });
-  }
-
-  return { handleDeeplink, handleURL };
-}
-
-/**
- * Initializes SharedDeeplinkManager and branch subscription
- */
-function* handleSharedDeeplinkManager(
-  queueOfHandleDeeplinkFunctions: DeepLinkQueuedItem[],
-  sdkState: SDKInitState,
-  handleDeeplink: (opts: any) => void
-) {
-  try {
-    //TODO: Migrate to the right type
-    SharedDeeplinkManager.init({
-      navigation: NavigationService.navigation as any,
-      dispatch: store.dispatch,
-    });
-    // Subscribe to branch deeplinks
-    branch.subscribe((opts) => {
-      const { error } = opts;
-      if (error) {
-        const branchError = new Error(error);
-        Logger.error(branchError, 'Error subscribing to branch.');
-      }
-      branch.getLatestReferringParams().then((val) => {
-        const deeplink = opts.uri || (val['+non_branch_link'] as string);
-        handleDeeplink({ uri: deeplink });
-      });
-      if (sdkState.isInitialized) {
-        handleDeeplink(opts);
-      } else if (opts.uri) {
-        queueOfHandleDeeplinkFunctions.push({
-          uri: opts.uri,
-          func: () => {
-            handleDeeplink(opts);
-          },
-        });
-      }
-    });
-  } catch (error) {
-    Logger.error(error as Error, 'Error initializing SharedDeeplinkManager');
-  }
-}
-
-/**
- * Initializes SDKConnect when user is onboarded and logged in
- */
-function* handleSDKConnect(queueOfHandleDeeplinkFunctions: DeepLinkQueuedItem[], sdkState: SDKInitState) {
-  try {
-    // Check if user is onboarded
-    const existingUser: string | null = yield call(StorageWrapper.getItem, EXISTING_USER);
-    const userLoggedIn: boolean = yield select(selectUserLoggedIn);
-    if (existingUser !== null && userLoggedIn) {
-      try {
-        const sdkConnect = SDKConnect.getInstance();
-        yield call([sdkConnect, 'init'], {
-          context: 'Nav/App',
-          navigation: NavigationService.navigation,
-        });
-
-        // Call postInit
-        yield call([sdkConnect, 'postInit'], () => {
-          const processedItems = new Set<string>();
-          while(queueOfHandleDeeplinkFunctions.length) {
-            const [deeplinkFunction] = queueOfHandleDeeplinkFunctions.splice(0, 1);
-
-            if (deeplinkFunction && !processedItems.has(deeplinkFunction.uri)) {
-              processedItems.add(deeplinkFunction.uri);
-              deeplinkFunction.func();
-            }
-          }
-        });
-
-        // Update the shared state
-        sdkState.isInitialized = true;
-        Logger.log('SDKConnect initialized successfully in saga');
-      } catch (err) {
-        Logger.error(err as Error, 'Cannot initialize SDKConnect in saga');
-      }
-    }
-  } catch (error) {
-    Logger.error(error as Error, 'Error checking user status for SDKConnect initialization');
-  }
-}
-
-/**
- * Initializes WalletConnect v2 Manager
- */
-function* handleWC2Manager() {
-  if (isWC2Enabled) {
-    try {
-      DevLogger.log(`WalletConnect: Initializing WalletConnect Manager in saga`);
-      yield call(WC2Manager.init, { navigation: NavigationService.navigation });
-    } catch (err) {
-      Logger.error(err as Error, 'Cannot initialize WalletConnect Manager in saga');
-    }
-  }
-}
-
-export function* handleDeeplinkServiceInitialization() {
-  const queueOfHandleDeeplinkFunctions: DeepLinkQueuedItem[] = [];
-  const sdkState: SDKInitState = { isInitialized: false };
-
-  // 1st. Initialize deeplink handling and URL processing (closed state)
-  const { handleDeeplink } = yield call(
-    handleInitialDeeplink,
-    queueOfHandleDeeplinkFunctions,
-    sdkState
-  );
-
-  // 2nd. Initialize SharedDeeplinkManager and branch subscribe
-  yield call(
-    handleSharedDeeplinkManager,
-    queueOfHandleDeeplinkFunctions,
-    sdkState,
-    handleDeeplink
-  );
-
-  // 3rd. Initialize SDKConnect when user is onboarded and logged in
-  yield call(
-    handleSDKConnect,
-    queueOfHandleDeeplinkFunctions,
-    sdkState
-  );
-  yield call(handleWC2Manager);
-}
-
 /**
  * Handles initializing app services on start up
  */
@@ -392,11 +188,20 @@ export function* startAppServices() {
     take(UserActionType.ON_PERSISTED_DATA_LOADED),
     take(NavigationActionType.ON_NAVIGATION_READY),
   ]);
-
-  yield call(handleDeeplinkServiceInitialization);
-
   // Start Engine service
   yield call(EngineService.start);
+
+
+  const sdkConnect = SDKConnect.getInstance();
+  yield all([
+    // Initialize WalletConnect v2 Manager
+    call(WC2Manager.init),
+    // Initialize SDKConnect
+    call([sdkConnect, 'init'], { context: 'Nav/App' })
+  ])
+
+  // Start DeeplinkManager and process branch deeplinks
+  SharedDeeplinkManager.start()
 
   // Start AppStateEventProcessor
   AppStateEventProcessor.start();

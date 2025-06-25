@@ -1,8 +1,8 @@
 'use strict';
 
-import { NavigationProp, ParamListBase } from '@react-navigation/native';
+import { NavigationContainerRef } from '@react-navigation/native';
 import { ParseOutput } from 'eth-url-parser';
-import { AnyAction, Dispatch, Store } from 'redux';
+import { Dispatch } from 'redux';
 import handleBrowserUrl from './Handlers/handleBrowserUrl';
 import handleEthereumUrl from './Handlers/handleEthereumUrl';
 import handleRampUrl from './Handlers/handleRampUrl';
@@ -12,26 +12,76 @@ import approveTransaction from './TransactionManager/approveTransaction';
 import { RampType } from '../../reducers/fiatOrders/types';
 import { handleSwapUrl } from './Handlers/handleSwapUrl';
 import Routes from '../../constants/navigation/Routes';
+import NavigationService from '../NavigationService';
+import { store } from '../../store';
+import branch from 'react-native-branch';
+import Logger from '../../util/Logger';
+import { AppStateEventProcessor } from '../AppStateEventListener';
+import { checkForDeeplink } from '../../actions/user';
+import { Linking } from 'react-native';
+import Device from '../../util/device';
 
 class DeeplinkManager {
-  public navigation: NavigationProp<ParamListBase>;
+  public navigation: NavigationContainerRef;
   public pendingDeeplink: string | null;
   // TODO: Replace "any" with type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public dispatch: Dispatch<any>;
 
-  constructor({
-    navigation,
-    dispatch,
-  }: {
-    navigation: NavigationProp<ParamListBase>;
-    // TODO: Replace "any" with type
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dispatch: Store<any, AnyAction>['dispatch'];
-  }) {
+  constructor() {
+    const navigation = NavigationService.navigation;
+    const dispatch = store.dispatch;
     this.navigation = navigation;
     this.pendingDeeplink = null;
     this.dispatch = dispatch;
+  }
+
+  private  handleDeeplink(opts: {
+     uri?: string;
+   }) {
+    const { dispatch } = store;
+    const {uri} = opts;
+    try {
+      if (uri && typeof uri === 'string') {
+        AppStateEventProcessor.setCurrentDeeplink(uri);
+        dispatch(checkForDeeplink());
+      }
+    } catch (e) {
+      Logger.error(e as Error, `Deeplink: Error parsing deeplink`);
+    }
+  }
+
+   start() {
+    //TODO: This function seems to me like a little risky
+    //getInitialURL and getLastReferringParams are async functions
+    //and won't be able to capture the error
+    //and end up having an un caught exception error
+    Linking.getInitialURL().then((url) => {
+      if (!url) {
+        return;
+      }
+      Logger.log(`handleDeeplink:: got initial URL ${url}`);
+      this.handleDeeplink({ uri: url });
+    });
+    if (Device.isAndroid()) {
+      Linking.addEventListener('url', (params) => {
+        const { url } = params;
+        this.handleDeeplink({ uri: url });
+      });
+    }
+    branch.subscribe((opts) => {
+      const { error } = opts;
+      if (error) {
+        const branchError = new Error(error);
+        Logger.error(branchError, 'Error subscribing to branch.');
+      }
+      //TODO: that async call in the subscribe doesn't look good to me
+      branch.getLatestReferringParams().then((val) => {
+        const deeplink = opts.uri || (val['+non_branch_link'] as string);
+        this.handleDeeplink({ uri: deeplink });
+      });
+      this.handleDeeplink(opts);
+    });
   }
 
   setDeeplink = (url: string) => (this.pendingDeeplink = url);
@@ -77,7 +127,6 @@ class DeeplinkManager {
   _handleBuyCrypto(rampPath: string) {
     handleRampUrl({
       rampPath,
-      navigation: this.navigation,
       rampType: RampType.BUY,
     });
   }
@@ -85,7 +134,6 @@ class DeeplinkManager {
   _handleSellCrypto(rampPath: string) {
     handleRampUrl({
       rampPath,
-      navigation: this.navigation,
       rampType: RampType.SELL,
     });
   }
