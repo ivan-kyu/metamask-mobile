@@ -515,7 +515,12 @@
     "basic_info": {
       "title": "기본 정보를 입력하세요",
       "continue": "계속",
-      "subtitle": "본인 인증을 시작하려면 기본 정보가 필요합니다."
+      "subtitle": "본인 인증을 시작하려면 기본 정보가 필요합니다.",
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "phone_number": "Phone Number",
+      "date_of_birth": "Date of Birth",
+      "social_security_number": "Social Security Number"
     },
     "enter_address": {
       "title": "주소를 입력하세요",
@@ -540,9 +545,42 @@
       "success_description": "You can now enter your payment info and complete your deposit.",
       "success_button": "Complete your order"
     },
+    "provider_webview": {
+      "title": "Deposit",
+      "webview_received_error": "Webview received error: %{code}"
+    },
     "kyc_webview": {
       "title": "Verifying your identity",
       "webview_received_error": "WebView received error status code: {{code}}"
+    },
+    "order_processing": {
+      "title": "Processing deposit",
+      "button": "Close",
+      "description": "Card purchases typically take a few minutes",
+      "success_title": "Deposit complete",
+      "success_description": "Your deposit of {{amount}} {{currency}} was successful!",
+      "error_title": "Deposit failed",
+      "error_description": "We were unable to complete your deposit",
+      "error_button": "Try again",
+      "contact_support_button": "Contact support",
+      "account": "Account",
+      "network": "Network",
+      "order_id": "Order ID",
+      "fees": "Fees",
+      "total": "Total",
+      "view_order_details_in_transak": "View order details in Transak",
+      "no_order_found": "No order found",
+      "back_to_wallet": "Back to Wallet"
+    },
+    "notifications": {
+      "deposit_failed_title": "Deposit of {{currency}} has failed! Please try again, sorry for the inconvenience!",
+      "deposit_failed_description": "Verify your payment method and card support",
+      "deposit_cancelled_title": "Your deposit was cancelled",
+      "deposit_cancelled_description": "Verify your payment method and card support",
+      "deposit_completed_title": "Your deposit of {{amount}} {{currency}} was successful!",
+      "deposit_completed_description": "Your {{currency}} is now available in your wallet",
+      "deposit_pending_title": "Processing your deposit of {{currency}}",
+      "deposit_pending_description": "This should only take a few minutes..."
     }
   },
   "receive": {
@@ -4123,6 +4161,7 @@
       "permit_NFTs": "출금 요청",
       "signature_siwe": "로그인 요청",
       "contract_interaction": "트랜잭션 요청",
+      "contract_deployment": "Deploy a contract",
       "transfer": "전송 요청",
       "switch_account_type": "계정 업데이트",
       "approve": "Approve request"
@@ -4134,7 +4173,8 @@
       "signature_siwe": "어떤 사이트에서 귀하가 이 계정을 소유했는지 확인하기 위해 로그인을 요청하고 있습니다.",
       "contract_interaction": "컨펌하기 전에 요청 세부 사항을 검토하세요.",
       "switch_to_smart_account": "스마트 계정으로 전환 중입니다.",
-      "switch_to_standard_account": "일반 계정(EOA)으로 전환 중입니다."
+      "switch_to_standard_account": "일반 계정(EOA)으로 전환 중입니다.",
+      "contract_deployment": "This site wants you to deploy a contract"
     },
     "request_from": "요청자:",
     "staking_from": "스테이킹 출처:",
@@ -4337,6 +4377,13 @@
     },
     "accounts_list": {
       "details": "Details"
+    },
+    "wallet_details": {
+      "wallet_name": "Wallet Name",
+      "balance": "Balance",
+      "add_account": "Add account",
+      "back_up": "Back up",
+      "reveal_recovery_phrase_with_index": "Reveal Recovery Phrase {{index}}"
     },
     "smart_account": {
       "title": "스마트 계정 활성화",

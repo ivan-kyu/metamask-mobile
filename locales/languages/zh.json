@@ -515,7 +515,12 @@
     "basic_info": {
       "title": "输入您的基本信息",
       "continue": "继续",
-      "subtitle": "为了开始验证您的身份，我们需要一些基本信息。"
+      "subtitle": "为了开始验证您的身份，我们需要一些基本信息。",
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "phone_number": "Phone Number",
+      "date_of_birth": "Date of Birth",
+      "social_security_number": "Social Security Number"
     },
     "enter_address": {
       "title": "输入您的地址",
@@ -540,9 +545,42 @@
       "success_description": "You can now enter your payment info and complete your deposit.",
       "success_button": "Complete your order"
     },
+    "provider_webview": {
+      "title": "Deposit",
+      "webview_received_error": "Webview received error: %{code}"
+    },
     "kyc_webview": {
       "title": "Verifying your identity",
       "webview_received_error": "WebView received error status code: {{code}}"
+    },
+    "order_processing": {
+      "title": "Processing deposit",
+      "button": "Close",
+      "description": "Card purchases typically take a few minutes",
+      "success_title": "Deposit complete",
+      "success_description": "Your deposit of {{amount}} {{currency}} was successful!",
+      "error_title": "Deposit failed",
+      "error_description": "We were unable to complete your deposit",
+      "error_button": "Try again",
+      "contact_support_button": "Contact support",
+      "account": "Account",
+      "network": "Network",
+      "order_id": "Order ID",
+      "fees": "Fees",
+      "total": "Total",
+      "view_order_details_in_transak": "View order details in Transak",
+      "no_order_found": "No order found",
+      "back_to_wallet": "Back to Wallet"
+    },
+    "notifications": {
+      "deposit_failed_title": "Deposit of {{currency}} has failed! Please try again, sorry for the inconvenience!",
+      "deposit_failed_description": "Verify your payment method and card support",
+      "deposit_cancelled_title": "Your deposit was cancelled",
+      "deposit_cancelled_description": "Verify your payment method and card support",
+      "deposit_completed_title": "Your deposit of {{amount}} {{currency}} was successful!",
+      "deposit_completed_description": "Your {{currency}} is now available in your wallet",
+      "deposit_pending_title": "Processing your deposit of {{currency}}",
+      "deposit_pending_description": "This should only take a few minutes..."
     }
   },
   "receive": {
@@ -4123,6 +4161,7 @@
       "permit_NFTs": "提取请求",
       "signature_siwe": "登录请求",
       "contract_interaction": "交易请求",
+      "contract_deployment": "Deploy a contract",
       "transfer": "转账请求",
       "switch_account_type": "账户更新",
       "approve": "Approve request"
@@ -4134,7 +4173,8 @@
       "signature_siwe": "一个网站需要您登录来证明您拥有此账户。",
       "contract_interaction": "在确认之前检查请求详情。",
       "switch_to_smart_account": "您正在切换到智能账户。",
-      "switch_to_standard_account": "您正在切换回标准账户（EOA）。"
+      "switch_to_standard_account": "您正在切换回标准账户（EOA）。",
+      "contract_deployment": "This site wants you to deploy a contract"
     },
     "request_from": "请求来自",
     "staking_from": "质押提供商",
@@ -4337,6 +4377,13 @@
     },
     "accounts_list": {
       "details": "Details"
+    },
+    "wallet_details": {
+      "wallet_name": "Wallet Name",
+      "balance": "Balance",
+      "add_account": "Add account",
+      "back_up": "Back up",
+      "reveal_recovery_phrase_with_index": "Reveal Recovery Phrase {{index}}"
     },
     "smart_account": {
       "title": "启用智能账户",
